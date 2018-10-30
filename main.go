@@ -62,7 +62,7 @@ func (wh *Word2Html) process(filepath string) error {
 	}
 	fmt.Printf("ur = %+v\n", ur)
 	url := fmt.Sprintf("%s%s", downloadUrl, ur.Filename)
-	return wh.Download(url, ur.Filename)
+	return wh.Download(url, ur.Filename, getFileName(filepath)+".html")
 }
 
 // 上传文件结构体
@@ -120,7 +120,7 @@ func (wh *Word2Html) PostFile(filename string) (*UploadResult, error) {
 	return ur, nil
 }
 
-func (wh *Word2Html) Download(url, filename string) error {
+func (wh *Word2Html) Download(url, filename, saveFilName string) error {
 	fmt.Printf("downloadUrl=%s\n", url)
 	resp, err := http.Get(url)
 	if err != nil {
@@ -132,9 +132,19 @@ func (wh *Word2Html) Download(url, filename string) error {
 	if err != nil {
 		return errors.New("read error")
 	}
-	err = ioutil.WriteFile(savePath+filename, content, 0644)
+	err = ioutil.WriteFile(savePath+saveFilName, content, 0644)
 	if err != nil {
 		return errors.New("write error")
 	}
 	return nil
+}
+
+func getFileName(fullName string) (string, error) {
+	i := strings.Index(fullName, ".")
+	if i == -1 {
+		fmt.Println("i", i)
+		return "", errors.New("fullName required contians .")
+	}
+	return string(fullName[:i]), nil
+
 }
